@@ -1,0 +1,29 @@
+{
+    "video": {
+        "width": 1280,
+        "height": 720,
+        "fps": 0,
+        "vsync": 0,
+        "show_fps": false
+    },
+    "language": {
+        "language_set": "pt-BR",
+        "en-US": {
+            "create_account": "Create Account",
+            "username": "Username",
+            "password": "Password",
+            "confirm_password": "Confirm Password",
+            "sing_up": "SING UP"
+        },
+        "pt-BR": {
+            "create_account": "Cadastro",
+            "username": "Usuário",
+            "password": "Senha",
+            "confirm_password": "Confirme a Senha",
+            "sing_up": "CADASTRAR"
+        }
+    },
+    "audio": {
+        "main_volume": 100
+    }
+}
