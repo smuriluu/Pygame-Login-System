@@ -1,4 +1,5 @@
 import pygame
+import time
 
 class Text():
     def __init__(self, screen, text_color, text_antialias, font, font_size):
@@ -20,7 +21,7 @@ class Text():
         self.text_antialias = text_antialias
 
 class Label(Text):
-    def __init__(self, screen, text_color=(0,0,0), text_antialias=True, font=None, font_size=100):
+    def __init__(self, screen, text_color=(0,0,0), text_antialias=True, font=None, font_size=100, visible=True):
         '''
         Initializes a Label object, inheriting from Text.
 
@@ -32,6 +33,7 @@ class Label(Text):
         - font_size: Size of the font (default is 100).
         '''
         super().__init__(screen, text_color, text_antialias, font, font_size)
+        self.visible = visible
     
     def write(self, text, pos, center_w=False, center_h=False):
         '''
@@ -43,13 +45,14 @@ class Label(Text):
         - center_w: Boolean to center the text horizontally around pos[0];
         - center_h: Boolean to center the text vertically around pos[1].
         '''
-        # Render the text as a surface with the specified font, color, and antialiasing.
-        text_surf = self.text_font.render(str(text), self.text_antialias, self.text_color)
-        # Calculate offsets for centering the text, if enabled.
-        center_width = text_surf.get_width() / 2 if center_w else 0
-        center_height = text_surf.get_height() / 2 if center_h else 0
-        # Blit the text surface onto the screen at the adjusted position.
-        self.screen.blit(text_surf, (pos[0] - center_width, pos[1] - center_height))
+        if self.visible:
+            # Render the text as a surface with the specified font, color, and antialiasing.
+            text_surf = self.text_font.render(str(text), self.text_antialias, self.text_color)
+            # Calculate offsets for centering the text, if enabled.
+            center_width = text_surf.get_width() / 2 if center_w else 0
+            center_height = text_surf.get_height() / 2 if center_h else 0
+            # Blit the text surface onto the screen at the adjusted position.
+            self.screen.blit(text_surf, (pos[0] - center_width, pos[1] - center_height))
 
 class TextButton(Text):
     def __init__(self, screen, text_color, text_antialias, font, font_size):
@@ -92,17 +95,17 @@ class TextBoxContent(Text):
         super().__init__(screen, text_color, text_antialias, font, font_size)
         self.text_surf = self.text_font.render('', self.text_antialias, self.text_color)
     
-    def write(self, text, pos, offset, text_box_size, center_h=False, padding=10):
+    def write(self, text, pos, offset, text_box_size, padding, center_h=True):
         self.text_surf = self.text_font.render(text, self.text_antialias, self.text_color)
-        center_height = self.text_surf.get_height() / 2 if center_h else 0
-        clip_surface = pygame.Surface(((text_box_size[0]-(padding*2)), (text_box_size[1]-(padding*2))), pygame.SRCALPHA)
+        center_height = text_box_size[1]/3 if center_h else 0
+        clip_surface = pygame.Surface(((text_box_size[0]-(padding*2)), text_box_size[1]), pygame.SRCALPHA)
         clip_surface.fill((0,0,0,0))
-        clip_surface.blit(self.text_surf, (-offset, center_height))
-        self.screen.blit(clip_surface, ((pos[0]+padding), (pos[1]+padding)))
+        clip_surface.blit(self.text_surf, (-offset, 0))
+        self.screen.blit(clip_surface, ((pos[0]+padding), pos[1]+center_height))
 
 ### REVIEW ###
 class Button(TextButton):
-    def __init__(self, screen, pos, size=(300, 100), text_color=(0,0,0), text_hover_color=(0,0,0), text_antialias=True, text_font=None, text_font_size=100, button_color=(128,128,128), button_hover_color=(100,100,100), shadow_size=(0,0), shadow_color=(0,0,0), border=-1, border_color=(0,0,0), border_radius=0, transparency=0):
+    def __init__(self, screen, aspect_ratio, pos, size=(300, 100), text_color=(0,0,0), text_hover_color=(0,0,0), visible=True, text_antialias=True, text_font=None, text_font_size=100, button_color=(128,128,128), button_hover_color=(100,100,100), shadow_size=(0,0), shadow_color=(0,0,0), border=-1, border_color=(0,0,0), border_radius=0, transparency=0):
         '''
         Initializes the Button object, which inherits from the TextButton class.
 
@@ -126,6 +129,7 @@ class Button(TextButton):
         '''
         super().__init__(screen, text_color, text_antialias, text_font, text_font_size)
         self.screen = screen
+        self.aspect_ratio = aspect_ratio
         self.pos = pos
 
         # Create the button rect.
@@ -165,6 +169,7 @@ class Button(TextButton):
         self.transparency = transparency
         # Tracks whether the button is currently pressed.
         self.pressed = False
+        self.visible = visible
         
     def draw(self, text):
         '''
@@ -173,59 +178,60 @@ class Button(TextButton):
         Parameters:
         - text: Text to display on the button.
         '''
-        # Draw the shadow (background).
-        pygame.draw.rect(self.screen, self.shadow_color, self.shadow_rect, border_radius=self.border_radius, width=self.transparency)
-        # Draw the button (main rectangle).
-        pygame.draw.rect(self.screen, self.current_button_color, self.button_rect, border_radius=self.border_radius, width=self.transparency)
-        # Draw the border, if enabled.
-        pygame.draw.rect(self.screen, self.border_color, self.button_rect, border_radius=self.border_radius, width=self.border)
-        # Draw the text at the center of the button.
-        self.write(text, (self.button_rect.centerx, self.button_rect.centery), self.button_rect.width)
+        if self.visible:
+            # Draw the shadow (background).
+            pygame.draw.rect(self.screen, self.shadow_color, self.shadow_rect, border_radius=self.border_radius, width=self.transparency)
+            # Draw the button (main rectangle).
+            pygame.draw.rect(self.screen, self.current_button_color, self.button_rect, border_radius=self.border_radius, width=self.transparency)
+            # Draw the border, if enabled.
+            pygame.draw.rect(self.screen, self.border_color, self.button_rect, border_radius=self.border_radius, width=self.border)
+            # Draw the text at the center of the button.
+            self.write(text, (self.button_rect.centerx, self.button_rect.centery), self.button_rect.width)
     
-    def click(self, aspect_ratio):
+    def click(self) -> bool:
         '''
         Handles mouse interaction with the button.
-
-        Parameters:
-        - aspect_ratio: Tuple (x_scale, y_scale) to adjust for screen resizing.
 
         Returns:
         - True if the button was clicked, False otherwise.
         '''
-        # Get the current mouse position.
-        mouse_pos = pygame.mouse.get_pos()
-        # Adjust the button's clickable area based on the aspect ratio.
-        updated_rect = pygame.Rect(self.button_x*aspect_ratio[0], self.button_y*aspect_ratio[1], self.button_rect.width*aspect_ratio[0], self.button_rect.height*aspect_ratio[1])
-        # Check if the mouse is within the updated rectangle.
-        if updated_rect.collidepoint(mouse_pos):
-            # Change the button and text color for hover state.
-            self.current_button_color = self.button_hover_color
-            self.text_color = self.text_hover_color
-            
-            # Check if the left mouse button is pressed.
-            if pygame.mouse.get_pressed()[0]:
-                # Move the button slightly to simulate a press (with shadow offset).
-                self.button_rect.center = (self.pos[0]+self.shadow_size[0], self.pos[1]+self.shadow_size[1])
-                self.pressed = True
+        if self.visible:
+            # Get the current mouse position.
+            mouse_pos = pygame.mouse.get_pos()
+            # Adjust the button's clickable area based on the aspect ratio.
+            updated_rect = pygame.Rect(self.button_x*self.aspect_ratio[0], self.button_y*self.aspect_ratio[1], self.button_rect.width*self.aspect_ratio[0], self.button_rect.height*self.aspect_ratio[1])
+            # Check if the mouse is within the updated rectangle.
+            if updated_rect.collidepoint(mouse_pos):
+                # Change the button and text color for hover state.
+                self.current_button_color = self.button_hover_color
+                self.text_color = self.text_hover_color
+                
+                # Check if the left mouse button is pressed.
+                if pygame.mouse.get_pressed()[0]:
+                    # Move the button slightly to simulate a press (with shadow offset).
+                    self.button_rect.center = (self.pos[0]+self.shadow_size[0], self.pos[1]+self.shadow_size[1])
+                    self.pressed = True
+                else:
+                    # If the button was pressed and is now released, register a click.
+                    if self.pressed:
+                        # Reset button position.
+                        self.button_rect.center = (self.pos[0], self.pos[1])
+                        self.pressed = False
+                        # Button click registered.
+                        return True
             else:
-                # If the button was pressed and is now released, register a click.
-                if self.pressed:
-                    # Reset button position.
-                    self.button_rect.center = (self.pos[0], self.pos[1])
-                    self.pressed = False
-                    # Button click registered.
-                    return True
+                # Reset button state if the mouse is not over it.
+                self.button_rect.center = (self.pos[0], self.pos[1])
+                self.current_button_color = self.button_color
+                self.text_color = self.text_current_color
+                self.pressed = False
+                # Button was not clicked.
+                return False
         else:
-            # Reset button state if the mouse is not over it.
-            self.button_rect.center = (self.pos[0], self.pos[1])
-            self.current_button_color = self.button_color
-            self.text_color = self.text_current_color
-            self.pressed = False
-            # Button was not clicked.
             return False
 
 class Slider(Button):
-    def __init__(self, screen, pos, slider_value, size=(300, 30), multiplier=1, button_color = (100,100,100), button_hover_color = (100,100,100), border_radius = 20, padding = 20, pointer_radius = 8, smooth=True):
+    def __init__(self, screen, aspect_ratio, pos, slider_value, size=(300, 30), multiplier=1, button_color = (100,100,100), button_hover_color = (100,100,100), border_radius = 20, padding = 20, pointer_radius = 8):
         '''
         Initializes the Slider object, which inherits from the Button class.
 
@@ -242,15 +248,13 @@ class Slider(Button):
         - pointer_radius: Radius of the slider pointer. Default is 8;
         - smooth: Boolean to determine if the slider moves smoothly or in discrete steps. Default is True.
         '''
-        super().__init__(screen, pos, size, button_color=button_color, button_hover_color=button_hover_color, border_radius=border_radius)
+        super().__init__(screen, aspect_ratio, pos, size, button_color=button_color, button_hover_color=button_hover_color, border_radius=border_radius)
         # Space on either side of the slider line.
         self.padding = padding
         # Size of the pointer (circle).
         self.pointer_radius = pointer_radius
         # Scaling factor for slider values.
         self.multiplier = multiplier
-        # Determines smooth or discrete pointer movement.
-        self.smooth = smooth
         # Calculate the initial pointer position based on the slider value.
         self.pointer_pos = int(((self.button_rect.width - self.padding*2) * slider_value / 100) / multiplier) + self.padding
 
@@ -269,12 +273,9 @@ class Slider(Button):
         # Draw the slider pointer as a circle
         pygame.draw.circle(self.screen, (0,0,0), (self.button_x + self.pointer_pos, self.button_y+self.button_rect.height/2), radius=self.pointer_radius)
     
-    def click_slider(self, aspect_ratio):
+    def click_slider(self):
         '''
         Handles mouse interaction with the slider.
-
-        Parameters:
-        - aspect_ratio: A tuple (x_scale, y_scale) to adjust for screen resizing.
 
         Returns:
         - True if the slider was clicked and value was updated;
@@ -283,7 +284,7 @@ class Slider(Button):
         # Get the current mouse position.
         mouse_pos = pygame.mouse.get_pos()
         # Adjust the slider's clickable area based on the aspect ratio.
-        updated_rect = pygame.Rect((self.button_x + self.padding)*aspect_ratio[0], self.button_y*aspect_ratio[1], (self.button_rect.width-self.padding*2)*aspect_ratio[0], self.button_rect.height*aspect_ratio[1])
+        updated_rect = pygame.Rect((self.button_x + self.padding)*self.aspect_ratio[0], self.button_y*self.aspect_ratio[1], (self.button_rect.width-self.padding*2)*self.aspect_ratio[0], self.button_rect.height*self.aspect_ratio[1])
         # Check if the mouse is within the slider's clickable area.
         if updated_rect.collidepoint(mouse_pos):
             # Check if the left mouse button is pressed.
@@ -292,19 +293,14 @@ class Slider(Button):
                 self.pointer_pos =  mouse_pos[0] - updated_rect.x
                 # Calculate the slider value based on the pointer's position.
                 self.slider_value = round((self.pointer_pos*100/updated_rect.width)*self.multiplier)
-                if self.smooth:
-                    # Smooth pointer movement.
-                    self.pointer_pos = (self.pointer_pos + self.padding) / aspect_ratio[0]
-                else:
-                    # Discrete pointer movement.
-                    self.pointer_pos = int(((self.button_rect.width - self.padding*2) * self.slider_value / 100) / self.multiplier) + self.padding
+                self.pointer_pos = int(((self.button_rect.width - self.padding*2) * self.slider_value / 100) / self.multiplier) + self.padding
                 # Slider value was updated.
                 return True
         # Slider was not clicked or updated.
         return False
 
 class TextBox(TextBoxContent):
-    def __init__(self, screen, pos, size=(300, 100), password=False, text_color=(0,0,0), text_antialias=True, text_font=None, text_font_size=40, tb_color=(128,128,128), border=-1, border_color=(0,0,0), border_radius=0, transparency=0):
+    def __init__(self, screen, aspect_ratio, pos, size=(300, 100), visible=True, display_text='', text_padding=10, password=False, text_color=(0,0,0), display_text_color=(0,0,0), text_antialias=True, text_font=None, text_font_size=40, tb_color=(128,128,128), border=-1, border_color=(0,0,0), border_radius=0, transparency=0):
         '''
         Initializes the TextBox object, which is used for user text input.
 
@@ -325,6 +321,7 @@ class TextBox(TextBoxContent):
         '''
         super().__init__(screen, text_color, text_antialias, text_font, text_font_size)
         self.screen = screen
+        self.aspect_ratio = aspect_ratio
         self.pos = pos
         # Text input by the user
         self.text = ''
@@ -342,6 +339,11 @@ class TextBox(TextBoxContent):
         self.offset = 0
         # Whether the text box should hide input (password)
         self.password = password
+        self.visible = visible
+        self.display_text = display_text
+        self.display_text_label = Label(screen, font_size=text_font_size, font=text_font, text_color=display_text_color)
+        self.bar_text_label = Label(screen, font_size=text_font_size, font=text_font)
+        self.text_padding = text_padding
         
     def draw(self):
         '''
@@ -350,43 +352,54 @@ class TextBox(TextBoxContent):
         Draws the text box background with a potential border, 
         then renders the user input (text or masked if password) inside it.
         '''
-        # Draw the text box background and border
-        pygame.draw.rect(self.screen, self.tb_color, self.tb_rect, border_radius=self.border_radius, width=self.transparency)
-        pygame.draw.rect(self.screen, self.border_color, self.tb_rect, border_radius=self.border_radius, width=self.border)
-        # Adjust text offset if it overflows the text box width
-        if self.text_surf.get_width() > self.tb_rect.width:
-            self.offset = self.text_surf.get_width() - self.tb_rect.width
-        else:
-            self.offset = 0
+        if self.visible:
+            # Draw the text box background and border
+            pygame.draw.rect(self.screen, self.tb_color, self.tb_rect, border_radius=self.border_radius, width=self.transparency)
+            pygame.draw.rect(self.screen, self.border_color, self.tb_rect, border_radius=self.border_radius, width=self.border)
+            # Adjust text offset if it overflows the text box width
+            if self.text_surf.get_width() > self.tb_rect.width:
+                self.offset = self.text_surf.get_width() - self.tb_rect.width
+            else:
+                self.offset = 0
         
-        # If the text box is set to password mode, display '*' for each character typed
-        if self.password:
-            self.write(f'{'*'*len(self.text)}', (self.tb_rect.x, self.tb_rect.y), self.offset, (self.tb_rect.width, self.tb_rect.height))
-        else:
-            # Otherwise, display the actual user text
-            self.write(self.text, (self.tb_rect.x, self.tb_rect.y), self.offset, (self.tb_rect.width, self.tb_rect.height))
+            # If the text box is set to password mode, display '*' for each character typed
+            if self.password:
+                self.write(f'{'*'*len(self.text)}', (self.tb_x, self.tb_y), self.offset, (self.tb_rect.width, self.tb_rect.height), self.text_padding)
+            else:
+                # Otherwise, display the actual user text
+                self.write(self.text, (self.tb_x, self.tb_y), self.offset, (self.tb_rect.width, self.tb_rect.height), self.text_padding)
+            
+            # Blinking logic
+            if self.text == '':
+                self.display_text_label.write(self.display_text, (self.tb_x+self.text_padding, self.tb_y + self.tb_rect.height/3))
+            if self.pressed:
+                self.blink_time = pygame.time.get_ticks() - self.start_blink
+                if self.blink_time <= 1000:
+                    self.bar_text_label.write('|', (self.tb_x+self.text_surf.width+self.text_padding/2, self.tb_y + self.tb_rect.height/2), center_h=True)
+                elif (self.blink_time//1000) % 2 == 0:
+                    self.bar_text_label.write('|', (self.tb_x+self.text_surf.width+self.text_padding/2, self.tb_y + self.tb_rect.height/2), center_h=True)
+            else:
+                self.start_blink = pygame.time.get_ticks()
     
-    def click(self, aspect_ratio):
+    def click(self):
         '''
         Handles mouse interaction with the text box.
-
-        Parameters:
-        - aspect_ratio: A tuple (x_scale, y_scale) to adjust for screen resizing.
 
         Returns:
         - True if the text box was clicked;
         - False otherwise.
         '''
-        # Get the current mouse position
-        mouse_pos = pygame.mouse.get_pos()
-        # Adjust the text box rectangle for different screen aspect ratios
-        updated_rect = pygame.Rect(self.tb_x*aspect_ratio[0], self.tb_y*aspect_ratio[1], self.tb_rect.width*aspect_ratio[0], self.tb_rect.height*aspect_ratio[1])
-        # If the mouse click is within the text box, set the 'pressed' flag to True
-        if updated_rect.collidepoint(mouse_pos) and pygame.mouse.get_pressed()[0]:
-            self.pressed = True
-        elif pygame.mouse.get_pressed()[0]:
-            # If mouse is released outside, set the 'pressed' flag to False
-            self.pressed = False
+        if self.visible:
+            # Get the current mouse position
+            mouse_pos = pygame.mouse.get_pos()
+            # Adjust the text box rectangle for different screen aspect ratios
+            updated_rect = pygame.Rect(self.tb_x*self.aspect_ratio[0], self.tb_y*self.aspect_ratio[1], self.tb_rect.width*self.aspect_ratio[0], self.tb_rect.height*self.aspect_ratio[1])
+            # If the mouse click is within the text box, set the 'pressed' flag to True
+            if updated_rect.collidepoint(mouse_pos) and pygame.mouse.get_pressed()[0]:
+                self.pressed = True
+            elif pygame.mouse.get_pressed()[0]:
+                # If mouse is released outside, set the 'pressed' flag to False
+                self.pressed = False
     
     def event(self, event):
         '''
@@ -409,3 +422,29 @@ class TextBox(TextBoxContent):
                 else:
                     # Add the character pressed to the user text
                     self.text += event.unicode
+
+class Panel():
+    def __init__(self, screen, aspect_ratio, pos, size=(100,100), color=(128,128,128)):
+        self.screen = screen
+        self.aspect_ratio = aspect_ratio
+        self.pos = pygame.math.Vector2(pos[0], pos[1])
+        self.velocity = pygame.math.Vector2(0, 0)
+        self.acceleration = pygame.math.Vector2(0, 0)
+        self.color = color
+        self.panel_surf = pygame.Surface((size[0], size[1]), pygame.SRCALPHA)
+        self.panel_rect = self.panel_surf.get_rect()
+        self.panel_rect.x = pos[0]
+        self.panel_rect.y = pos[1]
+    
+    def stop(self):
+        self.velocity.x = 0
+        self.pos = (self.panel_rect.x, self.panel_rect.y)
+    
+    def draw(self):
+        self.panel_surf.fill(self.color)
+        self.screen.blit(self.panel_surf, self.panel_rect)
+    
+    def update(self, dt):
+        self.pos += self.velocity * dt
+        self.panel_rect.x = self.pos[0]
+        self.panel_rect.y = self.pos[1]

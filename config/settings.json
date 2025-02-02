@@ -7,13 +7,16 @@
         "show_fps": false
     },
     "language": {
-        "language_set": "pt-BR",
+        "language_set": "en-US",
         "en-US": {
-            "create_account": "Create Account",
+            "sing_in": "Sing in",
+            "create_account": "Create\nAccount",
+            "btn_sing_in": "SING IN",
+            "btn_sing_up": "SING UP",
             "username": "Username",
             "password": "Password",
             "confirm_password": "Confirm Password",
-            "sing_up": "SING UP"
+            "forgot_password": "Forgot your password?"
         },
         "pt-BR": {
             "create_account": "Cadastro",
