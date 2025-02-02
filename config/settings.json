@@ -9,21 +9,42 @@
     "language": {
         "language_set": "en-US",
         "en-US": {
-            "sing_in": "Sing in",
+            "title": "Pygame",
             "create_account": "Create\nAccount",
             "btn_sing_in": "SING IN",
             "btn_sing_up": "SING UP",
             "username": "Username",
             "password": "Password",
             "confirm_password": "Confirm Password",
-            "forgot_password": "Forgot your password?"
+            "forgot_password": "Forgot your password?",
+            "error_code01": "Internal Server Error",
+            "error_code02": "Fields must not be null",
+            "error_code03": "Passwords must be the same",
+            "error_code04": "Username with invalid characters",
+            "error_code05": "Username must not begin with number",
+            "error_code06": "User already created",
+            "error_code07": "User or Password not filled in",
+            "msg_code01": "User created successfully",
+            "msg_code02": "Incorrect username or password"
         },
         "pt-BR": {
-            "create_account": "Cadastro",
+            "title": "Pygame",
+            "create_account": "Criar\nConta",
+            "btn_sing_in": "ENTRAR",
+            "btn_sing_up": "CADASTRAR",
             "username": "Usuário",
             "password": "Senha",
-            "confirm_password": "Confirme a Senha",
-            "sing_up": "CADASTRAR"
+            "confirm_password": "Confirme sua Senha",
+            "forgot_password": "Esqueceu sua senha?",
+            "error_code01": "Erro Interno do Servidor",
+            "error_code02": "Campos não podem ser nulos",
+            "error_code03": "As senhas devem ser idênticas",
+            "error_code04": "Usuário com caracteres inválidos",
+            "error_code05": "Usuário não pode começar com número",
+            "error_code06": "Usuário já cadastrado",
+            "error_code07": "Usuário ou Senha não preenchidos",
+            "msg_code01": "Usuário criado com sucesso",
+            "msg_code02": "Usuário ou Senha incorretos"
         }
     },
     "audio": {

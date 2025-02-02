@@ -40,8 +40,8 @@ Pygame-Login-System/
 ├── assets/           # Directory for fonts, images, and other resources
 │   └── fonts/        # Fonts used in the project
 │
-├── canvas/           # Screens of the system (e.g., registration, login, home)
-│   └── registration.py   # Registration screen
+├── canvas/           # Screens of the system (e.g., login, home)
+│   └── login.py      # login screen
 │
 ├── config/
 │   └── settings.json # Configuration file (resolution, audio, etc.)

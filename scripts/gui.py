@@ -410,18 +410,19 @@ class TextBox(TextBoxContent):
 
         Updates the user text based on key events (backspace, typing, etc.).
         '''
-        # If the text box is pressed, process key events
-        if self.pressed:
-            if event.type == pygame.KEYDOWN:
-                # Handle backspace key to delete last character
-                if event.key == pygame.K_BACKSPACE:
-                    self.text = self.text[:-1]
-                # Handle enter key to submit (currently does nothing)
-                elif event.key == pygame.K_RETURN:
-                    pass
-                else:
-                    # Add the character pressed to the user text
-                    self.text += event.unicode
+        if self.visible:
+            # If the text box is pressed, process key events
+            if self.pressed:
+                if event.type == pygame.KEYDOWN:
+                    # Handle backspace key to delete last character
+                    if event.key == pygame.K_BACKSPACE:
+                        self.text = self.text[:-1]
+                    # Handle enter key to submit (currently does nothing)
+                    elif event.key == pygame.K_RETURN:
+                        pass
+                    else:
+                        # Add the character pressed to the user text
+                        self.text += event.unicode
 
 class Panel():
     def __init__(self, screen, aspect_ratio, pos, size=(100,100), color=(128,128,128)):
